@@ -1,0 +1,48 @@
+.agent-box {
+    display: flex;
+    margin: 10px;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 20vw;
+    min-height: 22vh;
+    color: #fff;
+    font-size: 18px;
+    font-weight: bold;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.column-button-panel {
+    width: 95%;
+    display: flex;
+    justify-content: space-between;
+    /* Align to the right */
+    align-items: center;
+    /* Align to the top */
+    margin-right: 2;
+    margin-left: 2;
+    padding: 0.5em 0 0.5em 0.5em;
+}
+
+.delete-btn {
+    background-color: transparent;
+    border: none;
+    color: #fff;
+    font-weight: bold;
+    height: 30px;
+    width: 30px;
+    font-size: 10px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.delete-btn:hover {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+    outline: 4px auto -webkit-focus-ring-color;
+}
+
+.delete-btn->.left-label {
+    outline: none;
+}
