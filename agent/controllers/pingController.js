@@ -1,5 +1,6 @@
 const BackgroundPinger = require("../ping/backgroundPinger");
 const asyncHandler = require("express-async-handler");
+const { sendMessage } = require("../amqp")
 
 const pingPool = [];
 
@@ -8,7 +9,7 @@ function startPing(req, res) {
     const ip = req.body.ip;
     const pinger = new BackgroundPinger(ip);
     pingPool.push(pinger)
-    pinger.start(10);
+    pinger.start(10, sendMessage);
 
     res.status(201).json({ message: "Ping started", });
 };
@@ -33,7 +34,6 @@ function stopPing(req, res) {
     }
 
     res.status(400).json({ message: "Error", });
-
 };
 
 

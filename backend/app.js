@@ -1,26 +1,33 @@
 var createError = require('http-errors');
 var express = require('express');
 var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-var bodyParser = require('body-parser')
-const { connectRabbitMQ } = require('./amqp');
+var bodyParser = require('body-parser');
 var indexRouter = require('./routes/index');
-var pingRouter = require('./routes/ping');
+var usersRouter = require('./routes/ping');
+const { connectRabbitMQ, consumeMessagesAndBroadcast } = require('./amqp');
 
 var app = express();
+let io = {
+  socketIo: null
+}
+
+// Connect to RabbitMQ
+connectRabbitMQ().then(value => {
+  consumeMessagesAndBroadcast((message) => {
+    io.socketIo.emit('new_message', message);
+  });
+}).catch(console.error);
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json())
 
 app.use('/', indexRouter);
-app.use('/ping', pingRouter);
+app.use('/ping', usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   next(createError(404));
 });
-
 
 // error handler
 app.use(function (err, req, res, next) {
@@ -33,6 +40,4 @@ app.use(function (err, req, res, next) {
   res.json();
 });
 
-connectRabbitMQ()
-
-module.exports = app;
+module.exports = { app, io };
