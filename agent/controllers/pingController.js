@@ -1,34 +1,32 @@
 const BackgroundPinger = require("../ping/backgroundPinger");
-const asyncHandler = require("express-async-handler");
-const { sendMessage } = require("../amqp")
+const { Worker } = require("node:worker_threads");
+const { sendMessage } = require("../amqp");
 
 const pingPool = [];
 
 function startPing(req, res) {
-    console.log("Starting ping " + JSON.stringify(req.body))
-    const ip = req.body.ip;
-    const pinger = new BackgroundPinger(ip);
-    pingPool.push(pinger)
-    pinger.start(10, sendMessage);
+    try {
+        const url = req.body.url;
+        const pinger = new BackgroundPinger(url);
+        pingPool.push(pinger);
+        pinger.start(5000, sendMessage);
+        res.status(201).json({ uuid: pinger.uuid });
 
-    res.status(201).json({ message: "Ping started", });
+    } catch (err) {
+        console.error({ error: err });
+
+        res.status(500).json({ error: err });
+    }
 };
 
 function stopPing(req, res) {
-    console.log("Stopping ping for` " + req.params.ip)
-    console.log(pingPool)
-    const ip = req.params.ip;
-    console.log(ip)
-
-    const pinger = pingPool.find(p => p.ip === ip);
-
-    console.log(pinger)
-    console.log("test")
+    const uuid = req.params.uuid;
+    const pinger = pingPool.find(p => p.uuid === uuid);
 
     if (pinger) {
         pinger.stop();
         pingPool.length = 0;
-        pingPool.push(...pingPool.filter(item => item.ip !== ip));
+        pingPool.push(...pingPool.filter(item => item.uuid !== uuid));
         res.status(200).json({ message: "Ping stopped", });
         return;
     }

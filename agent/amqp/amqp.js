@@ -29,7 +29,6 @@ async function sendMessage(message) {
     const messageBuffer = Buffer.from(JSON.stringify(message));
 
     channel.sendToQueue(queueInfo.queue, messageBuffer);
-    console.log(" [x] Sent '%s':'%s'", queueInfo.severity, JSON.stringify(message));
 }
 
 module.exports = { connectRabbitMQ, sendMessage }

@@ -4,6 +4,6 @@ const { stopPing } = require("../controllers");
 var router = express.Router();
 
 router.post('/start', startPing);
-router.delete('/stop/:ip', stopPing);
+router.delete('/stop/:ip/agent/:uuid', stopPing);
 
 module.exports = router;

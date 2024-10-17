@@ -1,3 +1,4 @@
-import AgentBox from "./AgentBox";
+import AgentBox, { Agent } from "./AgentBox";
 
 export { AgentBox };
+export type { Agent };

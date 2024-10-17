@@ -1,19 +1,34 @@
 
 
-function startPing(req, res) {
-    fetch(`http://${req.body.ip}:5555/ping/start`, {
-        method: 'POST', body: {
-            ip: req.body.targetIP
+async function startPing(req, res) {
+    try {
+        const response = await fetch(`http://${req.body.ip}:5555/ping/start`, {
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            method: 'POST',
+            body: JSON.stringify({ url: req.body.url })
+        });
+
+        if (!response.ok) {
+            const json = await response.json();
+            console.error(`Error while fetching test: ${response.status} ${JSON.stringify(json)}`);
+            res.status(response.status).json({ message: "Failed to start ping", });
+            return;
         }
-    }).then((val) => { res.status(201).json({ message: "Ping started", }); }).catch(err => {
-        console.error(err);
+        const json = await response.json();
+        res.status(201).json(json);
+    }
+    catch (err) {
+        console.error(`Error while fetching: ${err} `);
+
         res.status(500).json({ message: err, });
         return;
-    })
+    }
 };
 
 function stopPing(req, res) {
-    fetch(`http://${req.body.ip}:5555/${req.body.targetIP}`, {
+    fetch(`http://${req.params.ip}:5555/${req.params.uuid}`, {
         method: 'DELETE'
     }).catch(err => {
         console.error(err);

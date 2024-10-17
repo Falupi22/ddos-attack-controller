@@ -1,56 +1,46 @@
-const { exec } = require('child_process');
-const { PingMessages } = require('../models');
-const { getIP } = require("../utils");
+const { Worker } = require("node:worker_threads");
+const { v4: uuidv4 } = require('uuid');
+const { log } = require("console");
+
 
 class BackgroundPinger {
-    constructor(ip) {
-        this.ip = ip;
+    constructor(url) {
+        this.url = url;
+        this.uuid = uuidv4();
         this.flag = false;
+        this.worker = null;
     }
     start = async (times, pingCallback) => {
-        this.flag = true;
-        for (let iter = 0; iter < times && this.flag; iter++) {
-            try {
-                // Spawn the process and detach it from the parent process
-                const child = exec(`ping ${this.ip}`, {
-                    detached: true,
-                    stdio: 'ignore'
-                });
-
-                child.stdout.on('data', async (data) => {
-                    let message;
-                    if (data.includes('Request timed out')) {
-                        message = PingMessages.REQUEST_TIMEOUT;
-                    } else if (data.includes('Destination host unreachable')) {
-                        message = PingMessages.DESTINATION_UNREACHABLE;
-                    } else if (data.includes('Network unreachable')) {
-                        message = PingMessages.NETWORK_UNREACHABLE;
-                    } else if (data.includes('transmit failed. General failure')) {
-                        message = PingMessages.GENERAL_FAILURE;
-                    } else {
-                        message = PingMessages.SUCCESS;
-                    }
-
-                    await pingCallback({
-                        ip: getIP(),
-                        targetIP: this.ip,
-                        message
-                    });
-
-                    await new Promise(resolve => setTimeout(resolve, 1000));
-                });
-
-                // Unreference the child process so it runs independently in the background
-                child.unref();
+        log(times)
+        this.worker = new Worker('../agent/ping/pingWorker.js', {
+            workerData: {
+                url: this.url,
+                times: times,
+                uuid: this.uuid
             }
-            catch (error) {
-                console.error(`Error occurred while pinging ${this.ip}: ${error}`);
-                this.flag = false;
+        });
+
+        this.worker.on('message', (val) => {
+            console.log(val);
+            pingCallback(val)
+        });
+
+        this.worker.on('error', (err) => {
+            console.error(`Worker encountered an error: ${err.message}`);
+            this.worker.terminate();
+        });
+
+        this.worker.on('exit', (code) => {
+            if (code !== 0) {
+                console.error(`Worker stopped with exit code ${code}`);
             }
-        }
+        });
+
+        this.worker
     }
     stop = () => {
         this.flag = false;
+        this.worker.terminate();
     }
 }
 

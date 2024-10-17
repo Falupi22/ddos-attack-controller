@@ -1,51 +1,41 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import "./AgentBox.scss"
 
-interface AgentBoxProps {
+export interface Agent {
     ip: string;
-    deleteCallback: (ip: string) => void;
+    url: string;
+    uuid: string;
+    message: string;
+    lastUpdated: string;
 }
 
+interface AgentBoxProps extends Agent {
+    deleteCallback: (ip: string) => void;
+    lastUpdated: string;
+}
 
-// Function to simulate ping response
-const simulatePing = (ip: string) => {
-    const responses = ['Request timed out', 'Destination host unreachable', 'Ping successful'];
-    // Simulate random ping results
-    const randomIndex = Math.floor(Math.random() * responses.length);
-    return responses[randomIndex];
-};
+const AgentBox = ({ ip, deleteCallback, url, message, uuid, lastUpdated }: AgentBoxProps) => {
+    const [color, setColor] = useState<string>('gray'); // Default to gray
 
-const AgentBox = ({ ip, deleteCallback }: AgentBoxProps) => {
-    const [status, setStatus] = useState(''); // Status of the IP ping
-    const [color, setColor] = useState('gray'); // Box color
-
-    // Use effect to simulate listening for ping updates
     useEffect(() => {
-        // Function to update the ping status and box color based on the result
-        const updatePingStatus = () => {
-            const pingResult = simulatePing(ip);
-            setStatus(pingResult);
+        let newColor = color;
+        if (message.includes('Ping request could not find host')) {
+            newColor = 'gray';
+        } else if (message === 'Request timed out') {
+            newColor = 'maroon';
+        } else if (message.includes('Pending')) {
+            newColor = 'orange';
+        } else if (message === 'Destination host unreachable') {
+            newColor = 'red';
+        } else if (message.includes('Ping successful')) {
+            newColor = 'green';
+        }
 
-            // Update color based on ping result
-            if (pingResult === 'Request timed out') {
-                setColor('gray');
-            } else if (pingResult === 'Destination host unreachable') {
-                setColor('red');
-            } else {
-                setColor('green');
-            }
-        };
-
-        updatePingStatus(); // Simulate initial ping
-
-        // Set up a timer to update the ping status every 5 seconds
-        const interval = setInterval(() => {
-            updatePingStatus();
-        }, 5000); // Adjust the interval as needed
-
-        // Clean up interval on component unmount
-        return () => clearInterval(interval);
-    }, [ip]);
+        // Only update color if it's different
+        if (newColor !== color) {
+            setColor(newColor);
+        }
+    }, [message, color]); // Re-run effect when message changes
 
     return (
         <div className="agent-box"
@@ -54,17 +44,22 @@ const AgentBox = ({ ip, deleteCallback }: AgentBoxProps) => {
             }}
         >
             <div className="column-button-panel">
-                <p className="left-label">Created At:</p>
+                <p className="left-label" style={{ textWrap: 'pretty', width: "70%", fontSize: '10px' }}>
+                    Last updated: {lastUpdated}
+                </p>
                 <button
-                    onClick={() => deleteCallback(ip)}
+                    onClick={() => deleteCallback(uuid)}
                     className="delete-btn">X</button>
             </div>
             <div>
                 <h2>{ip}</h2>
-                <p style={{ fontSize: '14px' }}>{status}</p>
+                <h4>{url}</h4>
+                <h6>{uuid}</h6>
+                <p style={{ fontSize: '14px', textWrap: 'wrap' }}>{message}</p>
             </div>
         </div>
     );
 };
+
 
 export default AgentBox;

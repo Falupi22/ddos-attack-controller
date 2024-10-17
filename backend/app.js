@@ -3,7 +3,8 @@ var express = require('express');
 var path = require('path');
 var bodyParser = require('body-parser');
 var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/ping');
+var pingRouter = require('./routes/ping');
+var cors = require('cors')
 const { connectRabbitMQ, consumeMessagesAndBroadcast } = require('./amqp');
 
 var app = express();
@@ -18,11 +19,12 @@ connectRabbitMQ().then(value => {
   });
 }).catch(console.error);
 
+app.use(cors())
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json())
 
 app.use('/', indexRouter);
-app.use('/ping', usersRouter);
+app.use('/ping', pingRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

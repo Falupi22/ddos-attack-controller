@@ -1,38 +1,62 @@
 import { useState } from 'react';
 
 interface IPInputProps {
-    addCallback: (ip: string) => void;
+    addCallback: (ip: string, url: string) => void;
 }
 
 const IPInput = ({ addCallback }: IPInputProps) => {
-    const [ip, setIp] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
+    const [ip, setIP] = useState('');
+    const [url, setURL] = useState('');
+    const [errorMessageIP, setErrorMessageIP] = useState('');
+    const [errorMessageURL, setErrorMessageURL] = useState('');
 
     // Regular expressions for validating IPv4 and IPv6
     const ipv4Regex = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
     const ipv6Regex = /^([0-9a-fA-F]{1,4}:){7}([0-9a-fA-F]{1,4})$/;
+    const urlRegex = "^(https?:\\/\\/)?([\\w\\d-]+)\\.([a-z]{2,6})(\\.[a-z]{2,6})?([\\/\\w\\d#?&=.-]*)?$";
 
     // Function to validate IP address
-    const validateIp = (value: string) => {
+    const validateIP = (value: string) => {
         if (ipv4Regex.test(value)) {
-            setErrorMessage(''); // Valid IPv4 address
+            setErrorMessageIP(''); // Valid IPv4 address
         } else if (ipv6Regex.test(value)) {
-            setErrorMessage(''); // Valid IPv6 address
+            setErrorMessageIP(''); // Valid IPv6 address
         } else {
-            setErrorMessage('Invalid IP address'); // Invalid IP
+            setErrorMessageIP('Invalid IP address'); // Invalid IP
+        }
+    };
+
+    const validateURL = (url: string) => {
+        const urlPattern = new RegExp(
+            urlRegex,
+            "i"
+        );
+
+        if (urlPattern.test(url) || ipv4Regex.test(url) || ipv6Regex.test(url)) {
+            setErrorMessageURL(''); // Valid URL
+        }
+        else {
+            setErrorMessageURL('Invalid URL'); // Invalid URL
         }
     };
 
     // Handle input change
-    const handleChange = (e) => {
+    const handleIPChange = (e) => {
         const value = e.target.value;
-        setIp(value);
-        validateIp(value);
+        setIP(value);
+        validateIP(value);
     };
+
+    const handleURLChange = (e) => {
+        const value = e.target.value;
+        setURL(value);
+        validateURL(value);
+    };
+
 
     return (
         <div>
-            <div style={{ padding: '20px' }}>
+            <div style={{ padding: '20px', display: 'flex', flexDirection: 'column' }}>
                 <label htmlFor="ipInput" style={{ fontWeight: 'bold' }}>
                     Enter an IP Address:
                 </label>
@@ -40,16 +64,31 @@ const IPInput = ({ addCallback }: IPInputProps) => {
                     id="ipInput"
                     type="text"
                     value={ip}
-                    onChange={handleChange}
+                    onChange={handleIPChange}
                     style={{ padding: '10px', marginLeft: '10px' }}
                     placeholder="Enter IPv4 or IPv6"
                 />
-                {errorMessage && (
-                    <p style={{ color: 'red', marginTop: '10px' }}>{errorMessage}</p>
+                <br />
+                <br />
+                <label htmlFor="urlInput" style={{ fontWeight: 'bold' }}>
+                    Enter a URL/IP:
+                </label>
+                <input
+                    id="urlInput"
+                    type="text"
+                    value={url}
+                    onChange={handleURLChange}
+                    style={{ padding: '10px', marginLeft: '10px' }}
+                    placeholder="Enter IPv4 or IPv6"
+                />
+                {errorMessageIP && (
+                    <p style={{ color: 'red', marginTop: '10px' }}>{errorMessageIP}</p>
                 )}
-
+                {errorMessageURL && (
+                    <p style={{ color: 'red', marginTop: '10px' }}>{errorMessageURL}</p>
+                )}
             </div>
-            <button disabled={errorMessage !== ''} onClick={() => addCallback(ip)}>
+            <button disabled={errorMessageIP !== '' || errorMessageURL !== ''} onClick={() => addCallback(ip, url)}>
                 Add
             </button>
         </div>

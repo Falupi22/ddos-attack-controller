@@ -1,23 +1,75 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { IPInput } from "../../components/ip"
-import { AgentBox } from "../../components/agentBox";
+import { AgentBox, Agent } from "../../components/agentBox";
+import { socket } from "../../socket";
 
 const MainPage = () => {
-    const [ips, setIPs] = useState<Array<string>>([]);
+    const [agents, setAgents] = useState<Array<Agent>>([]);
 
-    const addIP = (ip: string) => {
-        setIPs([...ips, ip]);
+    useEffect(() => {
+        const onNewMessage = function (message: { ip: string, url: string, uuid: string, message: string }) {
+            const agent = agents.find(agentBox => agentBox.uuid === message.uuid);
+            if (agent) {
+                const updatedAgent = {
+                    ...agent,
+                    lastUpdated: new Date(Date.now()).toLocaleString(),
+                    message: message.message
+                }
+                setAgents((agents) => [...agents.map((agent) => agent.uuid === message.uuid ? updatedAgent : agent)]);
+            }
+        };
+
+        socket.on('new_message', onNewMessage);
+
+        return () => {
+            socket.off('new_message', onNewMessage);
+        };
+    }, [agents]);
+
+
+
+    const addIP = async (ip: string, url: string) => {
+        const response = await fetch(`http://localhost:5000/ping/start`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ ip: ip, url: url }),
+        });
+        const uuid = (await response.json()).uuid;
+        if (!response.ok) {
+            window.alert("Error: " + response.status)
+        }
+        else {
+            const newAgent: Agent = {
+                ip,
+                url,
+                uuid,
+                lastUpdated: "No info",
+                message: '',
+            };
+            setAgents([...agents, newAgent]);
+        }
     }
 
-    const deleteIP = (ip: string) => {
-        setIPs((ips) => ips.filter((existingIP) => existingIP !== ip));
+    const deleteIP = async (uuid: string) => {
+        const ip = agents.find(agent => agent.uuid === uuid)?.ip;
+
+        if (ip) {
+            const response = await fetch(`http://localhost:5000/ping/stop/${ip}/agent/${uuid}`, { method: 'DELETE' });
+            if (!response.ok) {
+                window.alert("Error: " + response.status)
+                return;
+            }
+            setAgents((agents) => agents.filter((existingAgent) => existingAgent.uuid !== uuid));
+        }
     }
 
     return (
         <div>
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
-                {ips.map((ip) => (
-                    <AgentBox key={ip} ip={ip} deleteCallback={deleteIP} />
+                {agents.map((agent) => (
+                    <AgentBox key={agent.uuid} lastUpdated={agent.lastUpdated} uuid={agent.uuid} ip={agent.ip} url={agent.url} message={agent.message} deleteCallback={deleteIP} />
                 ))}
             </div>
             <IPInput addCallback={addIP} />
