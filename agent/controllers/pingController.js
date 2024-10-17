@@ -9,7 +9,11 @@ function startPing(req, res) {
         const url = req.body.url;
         const pinger = new BackgroundPinger(url);
         pingPool.push(pinger);
-        pinger.start(5000, sendMessage);
+
+        for (let i = 0; i < 5; i++) {
+            pinger.start(sendMessage);
+        }
+        console.log("Ping started")
         res.status(201).json({ uuid: pinger.uuid });
 
     } catch (err) {

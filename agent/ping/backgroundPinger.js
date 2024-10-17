@@ -10,19 +10,16 @@ class BackgroundPinger {
         this.flag = false;
         this.worker = null;
     }
-    start = async (times, pingCallback) => {
-        log(times)
+    start = async (pingCallback) => {
         this.worker = new Worker('../agent/ping/pingWorker.js', {
             workerData: {
                 url: this.url,
-                times: times,
                 uuid: this.uuid
             }
         });
 
-        this.worker.on('message', (val) => {
-            console.log(val);
-            pingCallback(val)
+        this.worker.on('message', async (val) => {
+            await pingCallback(val)
         });
 
         this.worker.on('error', (err) => {
