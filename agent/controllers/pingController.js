@@ -13,7 +13,6 @@ function startPing(req, res) {
         for (let i = 0; i < 5; i++) {
             pinger.start(sendMessage);
         }
-        console.log("Ping started")
         res.status(201).json({ uuid: pinger.uuid });
 
     } catch (err) {

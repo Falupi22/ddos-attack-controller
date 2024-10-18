@@ -8,36 +8,46 @@ class BackgroundPinger {
         this.url = url;
         this.uuid = uuidv4();
         this.flag = false;
-        this.worker = null;
+        this.workers = [];
     }
+    startFew = async (pingCallback, times) => {
+        for (let i = 0; i < times; i++) {
+            this.start(pingCallback);
+        }
+    }
+
     start = async (pingCallback) => {
-        this.worker = new Worker('../agent/ping/pingWorker.js', {
+        const worker = new Worker('../agent/ping/pingWorker.js', {
             workerData: {
                 url: this.url,
                 uuid: this.uuid
             }
         });
 
-        this.worker.on('message', async (val) => {
+        worker.on('message', async (val) => {
             await pingCallback(val)
         });
 
-        this.worker.on('error', (err) => {
+        worker.on('error', (err) => {
             console.error(`Worker encountered an error: ${err.message}`);
             this.worker.terminate();
         });
 
-        this.worker.on('exit', (code) => {
+        worker.on('exit', (code) => {
             if (code !== 0) {
                 console.error(`Worker stopped with exit code ${code}`);
             }
+            console.error(`Worker stopped`);
         });
 
-        this.worker
+        this.workers.push(worker);
+        this.flag = true;
     }
     stop = () => {
+        console.error(`Worker stop called`);
         this.flag = false;
-        this.worker.terminate();
+        this.workers.forEach(worker => worker.terminate());
+        this.workers.length = 0;
     }
 }
 

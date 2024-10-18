@@ -28,13 +28,16 @@ async function startPing(req, res) {
 };
 
 function stopPing(req, res) {
-    fetch(`http://${req.params.ip}:5555/${req.params.uuid}`, {
+    fetch(`http://${req.params.ip}:5555/ping/stop/${req.params.uuid}`, {
         method: 'DELETE'
     }).catch(err => {
         console.error(err);
         res.status(500).json({ message: err, });
         return;
-    }).then(() => { res.status(200).json({ message: "Ping stopped", }); });
+    }).then((v) => {
+        console.log(v.status);
+        res.status(200).json({ message: "Ping stopped", });
+    });
 };
 
 

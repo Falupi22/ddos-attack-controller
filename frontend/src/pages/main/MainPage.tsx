@@ -7,12 +7,12 @@ const MainPage = () => {
     const [agents, setAgents] = useState<Array<Agent>>([]);
 
     useEffect(() => {
-        const onNewMessage = function (message: { ip: string, url: string, uuid: string, message: string }) {
+        const onNewMessage = function (message: { ip: string, timestamp: string, url: string, uuid: string, message: string }) {
             const agent = agents.find(agentBox => agentBox.uuid === message.uuid);
             if (agent) {
                 const updatedAgent = {
                     ...agent,
-                    lastUpdated: new Date(Date.now()).toLocaleString(),
+                    timestamp: new Date(message.timestamp).toLocaleString(),
                     message: message.message
                 }
                 setAgents((agents) => [...agents.map((agent) => agent.uuid === message.uuid ? updatedAgent : agent)]);
@@ -45,7 +45,7 @@ const MainPage = () => {
                 ip,
                 url,
                 uuid,
-                lastUpdated: "No info",
+                timestamp: "No info",
                 message: '',
             };
             setAgents([...agents, newAgent]);
@@ -69,7 +69,7 @@ const MainPage = () => {
         <div>
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
                 {agents.map((agent) => (
-                    <AgentBox key={agent.uuid} lastUpdated={agent.lastUpdated} uuid={agent.uuid} ip={agent.ip} url={agent.url} message={agent.message} deleteCallback={deleteIP} />
+                    <AgentBox key={agent.uuid} timestamp={agent.timestamp} uuid={agent.uuid} ip={agent.ip} url={agent.url} message={agent.message} deleteCallback={deleteIP} />
                 ))}
             </div>
             <IPInput addCallback={addIP} />

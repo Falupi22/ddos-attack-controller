@@ -26,6 +26,7 @@ async function consumeMessagesAndBroadcast(messageCallback) {
                 await channel.consume('message_queue', (msg) => {
                     if (msg !== null) {
                         const receivedMessage = JSON.parse(msg.content.toString());
+
                         messageCallback(receivedMessage);
 
                         // Acknowledge the message

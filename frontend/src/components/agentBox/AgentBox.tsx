@@ -6,15 +6,14 @@ export interface Agent {
     url: string;
     uuid: string;
     message: string;
-    lastUpdated: string;
+    timestamp: string;
 }
 
 interface AgentBoxProps extends Agent {
     deleteCallback: (ip: string) => void;
-    lastUpdated: string;
 }
 
-const AgentBox = ({ ip, deleteCallback, url, message, uuid, lastUpdated }: AgentBoxProps) => {
+const AgentBox = ({ ip, deleteCallback, url, message, uuid, timestamp }: AgentBoxProps) => {
     const [color, setColor] = useState<string>('gray'); // Default to gray
 
     useEffect(() => {
@@ -45,7 +44,7 @@ const AgentBox = ({ ip, deleteCallback, url, message, uuid, lastUpdated }: Agent
         >
             <div className="column-button-panel">
                 <p className="left-label" style={{ textWrap: 'pretty', width: "70%", fontSize: '10px' }}>
-                    Last updated: {lastUpdated}
+                    Last updated: {timestamp}
                 </p>
                 <button
                     onClick={() => deleteCallback(uuid)}
