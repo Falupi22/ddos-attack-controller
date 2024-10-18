@@ -8,7 +8,7 @@ const url = workerData.url;
 const uuid = workerData.uuid;
 
 try {
-    let lastMessage = PingMessages.PENDING;
+    let lastMessage = PingMessages.NO_INFO;
     try {
         // Spawn the process and detach it from the parent process
         const child = exec(`ping ${url} -t -l 1000`, {
@@ -18,6 +18,10 @@ try {
 
         child.stdout.on('data', async (data) => {
             let message;
+            data = data.split('\n')            // Split the string by line breaks
+                .filter(line => line.trim() !== '')  // Filter out empty lines (trimmed lines)
+                .join('\n');
+
             const timestamp = new Date(Date.now()).getTime();
             if (data.includes('Request timed out')) {
                 message = PingMessages.REQUEST_TIMEOUT;
@@ -65,6 +69,7 @@ try {
                     timestamp
                 });
             } else if (data.startsWith('Pinging')) {
+                console.log('Pinging')
                 message = PingMessages.PENDING;
                 parentPort.postMessage({
                     ip: getIP(),
@@ -87,6 +92,7 @@ try {
             else {
                 // No meaning to the output
                 message = lastMessage;
+                log(data)
             }
 
             lastMessage = message;

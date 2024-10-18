@@ -6,7 +6,8 @@ const PingMessages = {
     GENERAL_FAILURE: 'General failure',
     UNKNOWN_ERROR: 'Unknown error',
     HOST_NOT_FOUND: 'Ping request could not find host',
-    PENDING: 'Pending IP response'
+    PENDING: 'Pending IP response',
+    NO_INFO: 'No info'
 };
 
 module.exports = PingMessages;
