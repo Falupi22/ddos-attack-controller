@@ -37,7 +37,7 @@ class BackgroundPinger {
             if (code !== 0) {
                 console.error(`Worker stopped with exit code ${code}`);
             }
-            console.error(`Worker stopped`);
+            console.error(`Worker stopped!`);
         });
 
         this.workers.push(worker);

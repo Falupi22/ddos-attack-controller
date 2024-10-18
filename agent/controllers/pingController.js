@@ -28,8 +28,9 @@ function stopPing(req, res) {
 
     if (pinger) {
         pinger.stop();
+        const remains = pingPool.filter(item => item.uuid !== uuid)
         pingPool.length = 0;
-        pingPool.push(...pingPool.filter(item => item.uuid !== uuid));
+        pingPool.push(...remains);
         res.status(200).json({ message: "Ping stopped", });
         return;
     }

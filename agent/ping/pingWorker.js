@@ -20,7 +20,7 @@ try {
             let message;
             data = data.split('\n')            // Split the string by line breaks
                 .filter(line => line.trim() !== '')  // Filter out empty lines (trimmed lines)
-                .join('\n');
+                .join();
 
             const timestamp = new Date(Date.now()).getTime();
             if (data.includes('Request timed out')) {
@@ -100,9 +100,6 @@ try {
             await new Promise(resolve => setTimeout(resolve, 100));
 
         });
-
-        // Unreference the child process so it runs independently in the background
-        child.unref();
     }
     catch (error) {
         console.error(`Error occurred while pinging ${url}: ${error}`);
