@@ -35,7 +35,6 @@ function stopPing(req, res) {
         res.status(500).json({ message: err, });
         return;
     }).then((v) => {
-        console.log(v.status);
         res.status(200).json({ message: "Ping stopped", });
     });
 };

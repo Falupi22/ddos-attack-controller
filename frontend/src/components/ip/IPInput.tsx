@@ -1,15 +1,13 @@
 import { useState } from 'react';
 
 interface IPInputProps {
-    addCallback: (ip: string, url: string) => void;
+    addCallback: (ip: string, url: string, name?: string) => void;
 }
-
-const ERROR_MESSAGE_INVALID_IP = 'Invalid IP';
-const ERROR_MESSAGE_INVALID_URL = 'Invalid URL';
 
 const IPInput = ({ addCallback }: IPInputProps) => {
     const [ip, setIP] = useState('');
     const [url, setURL] = useState('');
+    const [name, setName] = useState('');
     const [errorMessageIP, setErrorMessageIP] = useState('');
     const [errorMessageURL, setErrorMessageURL] = useState('');
 
@@ -50,17 +48,21 @@ const IPInput = ({ addCallback }: IPInputProps) => {
     };
 
     // Handle input change
-    const handleIPChange = (e) => {
+    const handleIPChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setIP(value);
         validateIP(value);
     };
 
-    const handleURLChange = (e) => {
+    const handleURLChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const value = e.target.value;
         setURL(value);
         validateURL(value);
     };
+
+    const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setName(e.target.value);
+    }
 
     return (
         <div>
@@ -77,9 +79,8 @@ const IPInput = ({ addCallback }: IPInputProps) => {
                     placeholder="Enter IPv4 or IPv6"
                 />
                 {errorMessageIP && (
-                    <p style={{ color: 'red', marginTop: '10px' }}>{errorMessageIP}</p>
+                    <p style={{ color: 'red', marginTop: '3px' }}>{errorMessageIP}</p>
                 )}
-                <br />
                 <br />
                 <label htmlFor="urlInput" style={{ fontWeight: 'bold' }}>
                     Enter a URL/IP:
@@ -93,10 +94,22 @@ const IPInput = ({ addCallback }: IPInputProps) => {
                     placeholder="Enter IPv4 or IPv6"
                 />
                 {errorMessageURL && (
-                    <p style={{ color: 'red', marginTop: '10px' }}>{errorMessageURL}</p>
+                    <p style={{ color: 'red', marginTop: '3px' }}>{errorMessageURL}</p>
                 )}
+                <br />
+                <label htmlFor="urlInput" style={{ fontWeight: 'bold' }}>
+                    Enter a name (optional):
+                </label>
+                <input
+                    id="nameInput"
+                    type="text"
+                    value={name}
+                    onChange={handleNameChange}
+                    style={{ padding: '10px', marginLeft: '10px' }}
+                    placeholder="Enter IPv4 or IPv6"
+                />
             </div>
-            <button disabled={!isIPValid(ip) || !isURLValid(url)} onClick={() => addCallback(ip, url)}>
+            <button disabled={!isIPValid(ip) || !isURLValid(url)} onClick={() => addCallback(ip, url, name)}>
                 Add
             </button>
         </div>

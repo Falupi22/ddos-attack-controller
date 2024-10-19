@@ -28,7 +28,7 @@ const MainPage = () => {
 
 
 
-    const addIP = async (ip: string, url: string) => {
+    const addAgent = async (ip: string, url: string, name: string | undefined) => {
         const response = await fetch(`http://localhost:5000/ping/start`, {
             method: 'POST',
             headers: {
@@ -47,12 +47,13 @@ const MainPage = () => {
                 uuid,
                 timestamp: "No info",
                 message: '',
+                name
             };
             setAgents([...agents, newAgent]);
         }
     }
 
-    const deleteIP = async (uuid: string) => {
+    const deleteAgent = async (uuid: string) => {
         const ip = agents.find(agent => agent.uuid === uuid)?.ip;
 
         if (ip) {
@@ -68,11 +69,11 @@ const MainPage = () => {
     return (
         <div>
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center' }}>
-                {agents.map((agent) => (
-                    <AgentBox key={agent.uuid} timestamp={agent.timestamp} uuid={agent.uuid} ip={agent.ip} url={agent.url} message={agent.message} deleteCallback={deleteIP} />
+                {agents.map((agent, index) => (
+                    <AgentBox key={agent.uuid} name={agent.name && agent.name !== '' ? agent.name : `Agent ${index + 1}`} timestamp={agent.timestamp} uuid={agent.uuid} ip={agent.ip} url={agent.url} message={agent.message} deleteCallback={deleteAgent} />
                 ))}
             </div>
-            <IPInput addCallback={addIP} />
+            <IPInput addCallback={addAgent} />
         </div>
     )
 }
